@@ -1,0 +1,59 @@
+#-*- coding: utf-8 -*-
+
+from HTMLParser import HTMLParser
+from urllib2 import urlopen
+import httplib
+import re
+
+
+class WebCrawler(HTMLParser):
+
+    def __init__(self, input_url, depth, limit):
+
+        HTMLParser.__init__(self)
+        self.url = input_url
+        self.link_dict = {self.url: 1}
+        self.node = [self.url]
+
+        self.depth = depth # recursion depth max
+        self.limit = limit # limit of links to be obtained per url
+        self.links_found = 0
+
+    def handle_starttag(self, tag, attrs):
+
+        if self.links_found < self.limit and tag == 'a' and attrs:
+            link = attrs[0][1]
+            if link[:4] != "http":
+                link = '/'.join(self.url.split('/')[:3])+('/'+link).replace('//','/')
+
+            if link not in self.link_dict:
+                print 'new link ---> %s' % link
+                self.links_found += 1
+                self.node.append(link)
+            self.link_dict[link] = (self.link_dict.get(link) or 0) + 1
+
+    def crawler(self):
+
+        for depth in xrange(self.depth):
+            print '#######Depth %d#########' % (depth+1)
+            context_node = self.node[:]
+            self.node = []
+            for self.url in context_node:
+                self.links_found = 0
+                try:
+                    req = urlopen(self.url)
+                    res = req.read()
+                    print res
+                    self.feed(res)
+                except:
+                    self.reset
+        print '############URL CRAWLED###############'
+        extracted_links = [(v,k) for (k,v) in self.link_dict.items()]
+        extracted_links.sort()
+        return extracted_links
+
+if __name__ == "__main__":
+        wc = WebCrawler(input_url= 'http://www.goal.com/en-india/', depth= 5 , limit = 10 )
+        result = wc.crawler()
+        for (n,link) in result:
+            print "%s was found %d time%s." %(link,n, "s" if n is not 1 else "")
