@@ -1,0 +1,59 @@
+
+
+
+from sys import *
+import xlrd
+import csv
+import re
+import sys
+import codecs
+import os
+from xlrd import XLRDError
+
+
+def setEncoding():
+    reload(sys)
+    sys.setdefaultencoding('UTF-8')
+    print sys.getdefaultencoding()
+
+
+def xlsToCsvConverter(infile, outfile):
+    setEncoding()
+    try:
+            inputFile = codecs.open(infile, 'r', 'utf-8')
+    except  IOError as (errno, strerror):
+            print "I/O error({0}): {1}".format(errno, strerror)
+
+    try:
+        outputFile = codecs.open(outfile, 'w+', 'utf-8')
+
+        outputFile.truncate()
+        csv_writer_out = csv.writer(outputFile)
+
+
+        book = xlrd.open_workbook(infile)
+        sheet = book.sheet_by_index(0)
+        for row_index in xrange(sheet.nrows):
+                excel_row = sheet.row_values(row_index)
+                csv_writer_out.writerow(excel_row)
+
+        outputFile.close()
+    except xlrd.XLRDError:
+        print "Error in file Conversion : "
+
+
+
+if __name__ == '__main__':
+
+
+    if(1 == len(argv)):
+            print "Usage: XLStoCSVConverter.py infile "
+            exit(1)
+    elif(2 == len(argv)):
+            script, infile = argv
+            newfile = os.path.splitext(infile)[0]
+            outfile = newfile  + ".csv"
+            xlsToCsvConverter(infile, outfile)
+
+
+
