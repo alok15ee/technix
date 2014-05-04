@@ -1,7 +1,7 @@
 import sys
 
 __author__="aloksingh"
-__date__ ="$Aug 10, 2012 8:02:27 PM$"
+
 
 import ctypes
 import platform
